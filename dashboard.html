@@ -1,0 +1,2156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANON - NURSE'S Dash UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DotGothic16&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #02040a;
+      --panel: #050b14;
+      --blue: #38bdf8;
+      --pink: #dde2e5;
+      --grey: #dde2e5;
+      --orange: #ea580c;
+      --electric: #7de2ff;
+      --graffiti-scale: 1;
+      --graffiti-x: 0px;
+      --graffiti-y: 0px;
+      --text: #f5f5f5;
+      --muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    .breathing-bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 28% 28%, rgba(56, 189, 248, 0.2), transparent 30%),
+        radial-gradient(circle at 78% 72%, rgba(234, 88, 12, 0.18), transparent 32%),
+        linear-gradient(to bottom, rgba(2, 4, 10, 0.72), var(--bg));
+      animation: breathe 5.5s ease-in-out infinite alternate;
+    }
+
+    .breathing-bg::before {
+      content: "";
+      position: absolute;
+      inset: -6%;
+      background-image:
+        radial-gradient(rgba(245, 245, 245, 0.06) 0.8px, transparent 0.8px),
+        linear-gradient(rgba(56, 189, 248, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.045) 1px, transparent 1px);
+      background-size: 8px 8px, 44px 44px, 44px 44px;
+      opacity: 0.65;
+      animation: drift 12s linear infinite;
+    }
+
+    .breathing-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent, rgba(2, 4, 10, 0.8));
+    }
+
+    .anon-landing-graffiti {
+      pointer-events: none !important;
+      position: absolute;
+      z-index: 0 !important;
+      top: clamp(5.5rem, 17vh, 13rem) !important;
+      left: 50% !important;
+      width: min(118vw, 1180px) !important;
+      height: clamp(180px, 30vw, 430px) !important;
+      transform: translateX(calc(-50% + var(--graffiti-x))) translateY(var(--graffiti-y)) scale(var(--graffiti-scale)) !important;
+      transform-origin: center center !important;
+      background-image:
+        linear-gradient(to bottom, rgba(2, 4, 10, 0.18), rgba(2, 4, 10, 0.52)),
+        url("https://gist.githack.com/cannonjason2027-lab/0877ef0e9034752a8e6f294dccbd8424/raw/philly-splash-orange.jpg") !important;
+      background-size: 112% auto !important;
+      background-position: 56% 48% !important;
+      opacity: 0.3 !important;
+      mix-blend-mode: screen !important;
+      filter: hue-rotate(-34deg) saturate(1.28) contrast(1.08) !important;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 75%, transparent) !important;
+      mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 75%, transparent) !important;
+    }
+
+    .dash-aurora {
+      --aura-1: rgba(56, 189, 248, 0.58);
+      --aura-2: rgba(14, 165, 233, 0.34);
+      --aura-3: rgba(125, 226, 255, 0.24);
+      position: fixed;
+      inset: -12%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.78;
+      mix-blend-mode: screen;
+    }
+
+    .dash-aurora::before {
+      content: "";
+      position: absolute;
+      inset: -20% 8%;
+      background:
+        radial-gradient(ellipse at 50% 18%, var(--aura-3), transparent 20%),
+        radial-gradient(ellipse at 50% 48%, var(--aura-2), transparent 26%),
+        linear-gradient(90deg, transparent 0 38%, var(--aura-1) 48%, rgba(255,255,255,0.15) 50%, var(--aura-1) 52%, transparent 64%),
+        repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.09) 0 1px, transparent 1px 9px);
+      filter: blur(1px) saturate(1.25);
+      transform: translateX(-18%) scaleX(0.82);
+      animation: auroraSweep 8.5s ease-in-out infinite alternate;
+    }
+
+    .dash-aurora::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 22% 32%, var(--aura-3), transparent 18%),
+        radial-gradient(circle at 74% 58%, var(--aura-2), transparent 20%),
+        radial-gradient(circle at 47% 72%, var(--aura-1), transparent 22%),
+        radial-gradient(rgba(125, 226, 255, 0.16) 0.8px, transparent 0.8px);
+      background-size: auto, auto, auto, 24px 24px;
+      opacity: 0.62;
+      animation: auraBreathe 5.8s ease-in-out infinite alternate;
+    }
+
+    .graffiti-backlight {
+      position: absolute;
+      z-index: 0;
+      pointer-events: none;
+      top: clamp(4.8rem, 15vh, 12rem);
+      left: 50%;
+      width: min(122vw, 1240px);
+      height: clamp(210px, 34vw, 480px);
+      transform: translateX(-50%);
+      background:
+        radial-gradient(ellipse at center, var(--aura-2), transparent 62%),
+        linear-gradient(90deg, transparent, var(--aura-1), transparent);
+      filter: blur(22px);
+      opacity: 0.48;
+      mix-blend-mode: screen;
+      animation: graffitiGlow 7s ease-in-out infinite alternate;
+    }
+
+    body.aura-blue .dash-aurora,
+    body.aura-blue .graffiti-backlight {
+      --aura-1: rgba(56, 189, 248, 0.58);
+      --aura-2: rgba(14, 165, 233, 0.34);
+      --aura-3: rgba(125, 226, 255, 0.24);
+    }
+
+    body.aura-orange .dash-aurora,
+    body.aura-orange .graffiti-backlight {
+      --aura-1: rgba(234, 88, 12, 0.54);
+      --aura-2: rgba(249, 115, 22, 0.34);
+      --aura-3: rgba(251, 146, 60, 0.24);
+    }
+
+    body.aura-pink .dash-aurora,
+    body.aura-pink .graffiti-backlight {
+      --aura-1: rgba(255, 62, 165, 0.5);
+      --aura-2: rgba(244, 114, 182, 0.32);
+      --aura-3: rgba(251, 207, 232, 0.2);
+    }
+
+    .aura-switch {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 20;
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: rgba(2, 4, 10, 0.76);
+      box-shadow: 0 0 24px rgba(0,0,0,0.45), inset 0 0 18px rgba(56, 189, 248, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .aura-switch button {
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(221, 226, 229, 0.34);
+      border-radius: 999px;
+      cursor: pointer;
+      opacity: 0.48;
+      transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .aura-switch button[aria-pressed="true"] {
+      opacity: 1;
+      transform: scale(1.08);
+      box-shadow: 0 0 14px currentColor;
+    }
+
+    .aura-blue-dot { color: #38bdf8; background: linear-gradient(135deg, #7de2ff, #38bdf8, #0ea5e9); }
+    .aura-orange-dot { color: #ea580c; background: linear-gradient(135deg, #fb923c, #f97316, #ea580c); }
+    .aura-pink-dot { color: #ff3ea5; background: linear-gradient(135deg, #fbcfe8, #f472b6, #ff3ea5); }
+
+    @keyframes auroraSweep {
+      from { transform: translateX(-24%) scaleX(0.78); opacity: 0.55; }
+      to { transform: translateX(22%) scaleX(1.06); opacity: 0.9; }
+    }
+
+    @keyframes auraBreathe {
+      from { transform: scale(0.98); opacity: 0.38; }
+      to { transform: scale(1.06); opacity: 0.78; }
+    }
+
+    @keyframes graffitiGlow {
+      from { opacity: 0.28; transform: translateX(-50%) scale(0.96); }
+      to { opacity: 0.58; transform: translateX(-50%) scale(1.03); }
+    }
+
+    @keyframes breathe {
+      from { filter: saturate(0.92) brightness(0.78); transform: scale(1); }
+      to { filter: saturate(1.2) brightness(1); transform: scale(1.025); }
+    }
+
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(-44px, -44px, 0); }
+    }
+
+    .dash-shell {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      overflow: auto;
+      padding: clamp(18px, 3vw, 36px);
+    }
+
+    .dash-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid rgba(234, 88, 12, 0.82);
+      padding-bottom: 18px;
+      margin: 0 auto 24px;
+      max-width: 1280px;
+    }
+
+    .brand {
+      margin: 0;
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: DotGothic16, monospace;
+      font-size: clamp(26px, 4vw, 58px);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 0 0 20px rgba(234, 88, 12, 0.72);
+    }
+
+    .brand-a,
+    .brand-acro {
+      color: var(--pink);
+      font-weight: 700;
+      -webkit-text-stroke: 1.35px var(--orange);
+      paint-order: stroke fill;
+      text-shadow: 0 0 3px var(--orange), 0 0 7px rgba(234, 88, 12, 0.7), 0 0 20px rgba(221, 226, 229, 0.76);
+    }
+
+    .brand-non {
+      color: var(--orange);
+      font-weight: 700;
+    }
+
+    .brand-equals {
+      color: var(--orange);
+      font-weight: 700;
+      text-shadow: 0 0 18px rgba(234, 88, 12, 0.58);
+    }
+
+    .brand-rest {
+      color: var(--orange);
+      font-size: 0.56em;
+      letter-spacing: 0.08em;
+    }
+
+    .meta {
+      color: var(--muted);
+      display: grid;
+      gap: 6px;
+      font: 11px/1.4 "JetBrains Mono", monospace;
+      letter-spacing: 0.16em;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .meta strong { color: var(--blue); font-weight: 500; }
+
+    .signup-link {
+      color: var(--orange);
+      text-decoration: none;
+      text-shadow: 0 0 12px rgba(234, 88, 12, 0.5);
+    }
+
+    .back-link {
+      color: var(--pink);
+      text-decoration: none;
+    }
+
+    .dash-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      position: relative;
+      min-height: 255px;
+      border: 1px solid rgba(56, 189, 248, 0.26);
+      background: rgba(0, 0, 0, 0.72);
+      box-shadow: inset 0 0 32px rgba(56, 189, 248, 0.08), 0 0 28px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      padding: 22px;
+    }
+
+    .dash-grid.layout-custom {
+      display: block;
+      position: relative;
+      max-width: 1280px;
+      min-height: 720px;
+    }
+
+    .dash-grid.layout-custom .panel {
+      position: absolute;
+      min-height: 180px;
+      touch-action: none;
+      transition: left 420ms cubic-bezier(0.16, 1, 0.3, 1), top 420ms cubic-bezier(0.16, 1, 0.3, 1), width 420ms cubic-bezier(0.16, 1, 0.3, 1), height 420ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    body.layout-editing {
+      cursor: move;
+      user-select: none;
+    }
+
+    body.layout-resizing {
+      cursor: nwse-resize;
+    }
+
+    body.layout-editing .panel {
+      border-color: rgba(251, 146, 60, 0.78);
+      box-shadow: inset 0 0 34px rgba(234, 88, 12, 0.16), 0 0 38px rgba(234, 88, 12, 0.3);
+    }
+
+    body.layout-editing .panel-title {
+      cursor: move;
+    }
+
+    body.layout-resizing .panel,
+    body.layout-resizing .panel-title {
+      cursor: nwse-resize;
+    }
+
+    .layout-resize-handle {
+      position: absolute;
+      right: 7px;
+      bottom: 7px;
+      width: 18px;
+      height: 18px;
+      z-index: 6;
+      opacity: 0;
+      pointer-events: none;
+      cursor: nwse-resize;
+    }
+
+    .layout-resize-handle::before,
+    .layout-resize-handle::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      border-right: 1px solid var(--pink);
+      border-bottom: 1px solid var(--pink);
+    }
+
+    .layout-resize-handle::before {
+      width: 18px;
+      height: 18px;
+    }
+
+    .layout-resize-handle::after {
+      width: 10px;
+      height: 10px;
+    }
+
+    body.layout-editing .layout-resize-handle {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .layout-edit-badge {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 30;
+      border: 1px solid rgba(234, 88, 12, 0.72);
+      background: rgba(2, 4, 10, 0.88);
+      color: var(--pink);
+      font: 700 10px/1 "JetBrains Mono", monospace;
+      letter-spacing: 0.14em;
+      padding: 10px 12px;
+      text-transform: uppercase;
+      box-shadow: 0 0 24px rgba(234, 88, 12, 0.26);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: 160ms ease;
+      pointer-events: none;
+    }
+
+    body.layout-editing .layout-edit-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    body.dev-mode .layout-edit-badge,
+    body.graffiti-editing .layout-edit-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    body.layout-fit-flash .layout-edit-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    body.layout-snap-flash .layout-edit-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    body.layout-magnetizing .panel {
+      border-color: rgba(125, 226, 255, 0.72);
+      box-shadow: inset 0 0 36px rgba(125, 226, 255, 0.14), 0 0 30px rgba(125, 226, 255, 0.28);
+    }
+
+    body.layout-magnetizing .corner {
+      border-color: var(--electric);
+      filter: drop-shadow(0 0 8px rgba(125, 226, 255, 0.92));
+    }
+
+    .bu-guide {
+      position: fixed;
+      z-index: 40;
+      width: min(260px, calc(100vw - 36px));
+      border: 1px solid rgba(125, 226, 255, 0.78);
+      background: rgba(2, 4, 10, 0.92);
+      color: var(--text);
+      padding: 12px 14px;
+      box-shadow: 0 0 26px rgba(125, 226, 255, 0.34), inset 0 0 18px rgba(56, 189, 248, 0.08);
+      opacity: 0;
+      transform: scale(0.94);
+      transition: 180ms ease;
+      pointer-events: none;
+    }
+
+    .bu-guide.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .bu-guide.tl { left: 18px; top: 18px; }
+    .bu-guide.tr { right: 18px; top: 18px; }
+    .bu-guide.br { right: 18px; bottom: 18px; }
+    .bu-guide.bl { left: 18px; bottom: 18px; }
+
+    .bu-guide b {
+      display: block;
+      color: #7de2ff;
+      font: 700 12px/1 "JetBrains Mono", monospace;
+      letter-spacing: 0.18em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(125, 226, 255, 0.72);
+    }
+
+    .bu-guide span {
+      display: block;
+      color: var(--muted);
+      font: 11px/1.45 "JetBrains Mono", monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .layout-panel-content {
+      position: absolute;
+      z-index: 1;
+      transition: transform 180ms ease;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(var(--fit-scale, 1));
+      transform-origin: center center;
+      width: 100%;
+    }
+
+    .square-panel .layout-panel-content {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(245, 245, 245, 0.08) 0.7px, transparent 0.7px);
+      background-size: 7px 7px;
+      opacity: 0.24;
+      pointer-events: none;
+    }
+
+    .panel > * { position: relative; z-index: 1; }
+
+    .corner {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-color: var(--orange);
+      z-index: 2;
+    }
+
+    .corner::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--orange);
+      box-shadow: 0 0 10px rgba(234, 88, 12, 0.9);
+    }
+
+    .tl::after { left: -4px; top: -4px; }
+    .tr::after { right: -4px; top: -4px; }
+    .bl::after { left: -4px; bottom: -4px; }
+    .br::after { right: -4px; bottom: -4px; }
+
+    .electric-arc {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 54%;
+      height: 2px;
+      z-index: 4;
+      pointer-events: none;
+      background: repeating-linear-gradient(90deg, #7de2ff 0 8px, transparent 8px 13px, #b9f5ff 13px 17px);
+      box-shadow: 0 0 12px rgba(125, 226, 255, 0.95), 0 0 26px rgba(56, 189, 248, 0.72);
+      opacity: 0;
+      transform-origin: left center;
+    }
+
+    .electric-arc.a1 { transform: rotate(0deg) translateX(8px); }
+    .electric-arc.a2 { transform: rotate(90deg) translateX(8px); }
+    .electric-arc.a3 { transform: rotate(180deg) translateX(8px); }
+    .electric-arc.a4 { transform: rotate(270deg) translateX(8px); }
+
+    body.layout-magnetizing .electric-arc {
+      animation: electricPull 420ms steps(2, end) 3;
+    }
+
+    @keyframes electricPull {
+      0% { opacity: 0; filter: brightness(1); }
+      18% { opacity: 1; clip-path: polygon(0 40%, 12% 0, 24% 70%, 38% 20%, 52% 82%, 66% 18%, 82% 65%, 100% 45%, 100% 70%, 0 70%); }
+      62% { opacity: 0.72; filter: brightness(1.8); }
+      100% { opacity: 0; }
+    }
+
+    .tl { left: 0; top: 0; border-left: 1px solid; border-top: 1px solid; }
+    .tr { right: 0; top: 0; border-right: 1px solid; border-top: 1px solid; }
+    .bl { left: 0; bottom: 0; border-left: 1px solid; border-bottom: 1px solid; }
+    .br { right: 0; bottom: 0; border-right: 1px solid; border-bottom: 1px solid; }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--blue);
+      font: 11px/1.4 "JetBrains Mono", monospace;
+      letter-spacing: 0.16em;
+      margin-bottom: 22px;
+      text-transform: uppercase;
+    }
+
+    .panel-title .hot { color: var(--pink); }
+
+    .equalizer {
+      height: 76px;
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 34px;
+    }
+
+    .eq-bar {
+      width: 8px;
+      height: 20px;
+      background: var(--blue);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
+      animation: eq 900ms ease-in-out infinite alternate;
+    }
+
+    .eq-bar:nth-child(2n) { animation-delay: 120ms; background: var(--pink); box-shadow: 0 0 14px rgba(234, 88, 12, 0.75); }
+    .eq-bar:nth-child(3n) { animation-delay: 240ms; }
+
+    @keyframes eq {
+      from { height: 16px; opacity: 0.55; }
+      to { height: 70px; opacity: 1; }
+    }
+
+    .scanline {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--blue), transparent);
+      margin: 20px 0 14px;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
+    }
+
+    .caption {
+      color: var(--muted);
+      font: 11px/1.5 "JetBrains Mono", monospace;
+      letter-spacing: 0.15em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .ring-wrap {
+      display: grid;
+      place-items: center;
+      min-height: 150px;
+    }
+
+    .rings {
+      position: relative;
+      width: 146px;
+      height: 146px;
+      display: grid;
+      place-items: center;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 999px;
+      border: 2px dashed var(--blue);
+      animation: spin 16s linear infinite;
+    }
+
+    .ring:nth-child(1) { inset: 0; border-color: var(--orange); }
+    .ring:nth-child(2) { inset: 15px; border-width: 7px; border-style: solid; border-color: rgba(56, 189, 248, 0.75); animation-duration: 11s; animation-direction: reverse; }
+    .ring:nth-child(3) { inset: 38px; border-width: 9px; border-color: var(--orange); animation-duration: 8s; }
+
+    .ring-value {
+      color: var(--blue);
+      font: 700 28px/1 "JetBrains Mono", monospace;
+      text-align: center;
+      text-shadow: 0 0 15px rgba(56, 189, 248, 0.7);
+    }
+
+    .ring-value span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      margin-top: 7px;
+      text-transform: uppercase;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .center-brand {
+      display: grid;
+      place-items: center;
+      min-height: 255px;
+      text-align: center;
+    }
+
+    .center-brand strong {
+      color: var(--blue);
+      font-family: DotGothic16, monospace;
+      font-size: clamp(42px, 6vw, 86px);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 28px rgba(56, 189, 248, 0.8);
+    }
+
+    .center-brand strong span {
+      display: inline;
+      font: inherit;
+      letter-spacing: inherit;
+      margin-top: 0;
+    }
+
+    .center-brand .center-brand-a {
+      color: var(--grey);
+      -webkit-text-stroke: 1.35px var(--orange);
+      paint-order: stroke fill;
+      text-shadow: 0 0 3px var(--orange), 0 0 7px rgba(234, 88, 12, 0.7), 0 0 20px rgba(221, 226, 229, 0.76);
+    }
+
+    .center-brand .center-brand-non {
+      color: var(--orange);
+      text-shadow: 0 0 18px rgba(234, 88, 12, 0.58);
+    }
+
+    .center-brand span {
+      color: var(--pink);
+      display: block;
+      font: 12px/1.5 "JetBrains Mono", monospace;
+      letter-spacing: 0.32em;
+      margin-top: 18px;
+      text-transform: uppercase;
+    }
+
+    .voice-launch {
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+      max-width: 92%;
+    }
+
+    .voice-button {
+      width: 54px;
+      height: 54px;
+      border: 1px solid rgba(234, 88, 12, 0.72);
+      border-radius: 999px;
+      background: rgba(234, 88, 12, 0.1);
+      color: var(--pink);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 24px rgba(234, 88, 12, 0.35);
+      padding: 0;
+    }
+
+    .voice-button svg {
+      width: 25px;
+      height: 25px;
+      fill: currentColor;
+    }
+
+    .voice-copy {
+      color: var(--muted);
+      font: 10px/1.65 "JetBrains Mono", monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .voice-copy b {
+      color: var(--pink);
+      font-weight: 500;
+    }
+
+    .route-view {
+      display: none;
+      gap: 14px;
+      width: 100%;
+      height: 100%;
+      align-content: stretch;
+    }
+
+    .center-brand.route-active {
+      place-items: stretch;
+      text-align: left;
+    }
+
+    .center-brand.route-active .voice-launch {
+      display: none;
+    }
+
+    .center-brand.route-active .route-view {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .route-title {
+      display: flex;
+      justify-content: space-between;
+      color: var(--blue);
+      font: 10px/1.4 "JetBrains Mono", monospace;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .mini-map {
+      position: relative;
+      min-height: 132px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background-image:
+        linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+      background-size: 18px 18px;
+      overflow: hidden;
+    }
+
+    .route-path {
+      position: absolute;
+      left: 14%;
+      top: 18%;
+      width: 72%;
+      height: 56%;
+      border-left: 3px solid var(--pink);
+      border-bottom: 3px solid var(--pink);
+      border-radius: 0 0 0 28px;
+      box-shadow: 0 0 16px rgba(234, 88, 12, 0.7);
+    }
+
+    .route-dot {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      background: var(--blue);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.9);
+    }
+
+    .route-dot.start { left: 11%; top: 14%; }
+    .route-dot.end { right: 10%; bottom: 20%; background: var(--pink); box-shadow: 0 0 16px rgba(234, 88, 12, 0.9); }
+
+    .route-steps {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font: 10px/1.45 "JetBrains Mono", monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .route-steps b {
+      color: var(--blue);
+      font-weight: 500;
+    }
+
+    .funnel {
+      height: 148px;
+      display: grid;
+      place-items: center;
+      perspective: 420px;
+    }
+
+    .funnel-stack {
+      position: relative;
+      width: 160px;
+      height: 90px;
+      transform: rotateX(62deg);
+    }
+
+    .funnel-ring {
+      position: absolute;
+      inset: 0;
+      border: 2px dashed var(--blue);
+      border-radius: 999px;
+      animation: pulseRing 1.8s ease-in-out infinite alternate;
+    }
+
+    .funnel-ring:nth-child(2) { inset: 14px; border-color: var(--orange); animation-delay: 160ms; }
+    .funnel-ring:nth-child(3) { inset: 28px; border-color: var(--orange); animation-delay: 320ms; }
+    .funnel-ring:nth-child(4) { inset: 42px; border-color: rgba(56, 189, 248, 0.7); animation-delay: 480ms; }
+
+    @keyframes pulseRing {
+      from { opacity: 0.45; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1.06); }
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 10px;
+      width: min(100%, 310px);
+      margin: 38px auto 0;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.08);
+      transition: 220ms ease;
+    }
+
+    .cell.on {
+      background: var(--blue);
+      box-shadow: 0 0 17px rgba(56, 189, 248, 0.85);
+    }
+
+    .cell.hot {
+      background: var(--pink);
+      box-shadow: 0 0 17px rgba(234, 88, 12, 0.75);
+    }
+
+    .body-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .scan-frame {
+      min-height: 190px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      position: relative;
+      overflow: hidden;
+      background-image:
+        linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+      background-size: 10px 10px;
+    }
+
+    .live-scan-image {
+      width: 100%;
+      height: 100%;
+      min-height: inherit;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.18) contrast(1.07) brightness(0.92);
+      animation: bodyInhale 4.2s ease-in-out infinite alternate;
+    }
+
+    .circulation-overlay,
+    .respiration-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .circulation-overlay::before,
+    .circulation-overlay::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 51% 47%, rgba(234, 88, 12, 0.62), transparent 8%),
+        linear-gradient(106deg, transparent 0 24%, rgba(56, 189, 248, 0.0) 25%, rgba(56, 189, 248, 0.75) 27%, transparent 30% 100%),
+        linear-gradient(74deg, transparent 0 20%, rgba(234, 88, 12, 0.0) 25%, rgba(234, 88, 12, 0.72) 28%, transparent 31% 100%);
+      mix-blend-mode: screen;
+      opacity: 0.38;
+      animation: circulationPulse 1.35s ease-in-out infinite;
+    }
+
+    .circulation-overlay::after {
+      animation-delay: 680ms;
+      transform: scaleX(-1);
+    }
+
+    .respiration-overlay {
+      border: 1px solid rgba(56, 189, 248, 0.18);
+    }
+
+    .respiration-overlay::before,
+    .respiration-overlay::after {
+      content: "";
+      position: absolute;
+      left: 26%;
+      top: 18%;
+      width: 48%;
+      height: 42%;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 50%;
+      box-shadow: 0 0 22px rgba(56, 189, 248, 0.25);
+      animation: lungBreath 4.2s ease-in-out infinite alternate;
+    }
+
+    .respiration-overlay::after {
+      left: 36%;
+      width: 28%;
+      border-color: rgba(234, 88, 12, 0.44);
+      animation-delay: 180ms;
+    }
+
+    @keyframes bodyInhale {
+      from { transform: scale(1); filter: saturate(1.05) contrast(1.04) brightness(0.86); }
+      to { transform: scale(1.024); filter: saturate(1.28) contrast(1.12) brightness(1); }
+    }
+
+    @keyframes circulationPulse {
+      0%, 100% { opacity: 0.18; filter: blur(1px); }
+      45% { opacity: 0.56; filter: blur(0); }
+    }
+
+    @keyframes lungBreath {
+      from { transform: scale(0.88); opacity: 0.22; }
+      to { transform: scale(1.08); opacity: 0.58; }
+    }
+
+    .vitals {
+      display: grid;
+      gap: 12px;
+    }
+
+    .vital {
+      border-left: 1px solid rgba(56, 189, 248, 0.5);
+      padding-left: 12px;
+    }
+
+    .vital span {
+      display: block;
+      color: var(--muted);
+      font: 10px/1.2 "JetBrains Mono", monospace;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .vital strong {
+      color: var(--blue);
+      display: block;
+      font: 700 22px/1.1 "JetBrains Mono", monospace;
+      margin-top: 4px;
+    }
+
+    .response-log {
+      min-height: 145px;
+      border: 1px solid rgba(234, 88, 12, 0.22);
+      color: var(--muted);
+      font: 12px/1.55 "JetBrains Mono", monospace;
+      padding: 14px;
+    }
+
+    .response-log b { color: var(--pink); }
+
+    .square-panel {
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .square-panel .panel-title {
+      margin-bottom: 16px;
+    }
+
+    .anatomical-panel .body-grid {
+      grid-template-columns: 1fr;
+      gap: 13px;
+      flex: 1;
+    }
+
+    .anatomical-panel .scan-frame {
+      min-height: 205px;
+    }
+
+    .anatomical-panel .vitals {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+
+    .anatomical-panel .vital strong {
+      font-size: 17px;
+    }
+
+    .drone-network {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .flyby-map {
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.26);
+      border-radius: 2px;
+      background:
+        radial-gradient(circle at 18% 24%, rgba(234, 88, 12, 0.2), transparent 18%),
+        radial-gradient(circle at 72% 68%, rgba(56, 189, 248, 0.18), transparent 22%),
+        linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        rgba(5, 11, 20, 0.72);
+      background-size: auto, auto, 18px 18px, 18px 18px, auto;
+    }
+
+    .flyby-map::after {
+      content: "LIVE AI CAMERA MESH";
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      color: rgba(245, 245, 245, 0.78);
+      font: 700 9px/1 "JetBrains Mono", monospace;
+      letter-spacing: 0.14em;
+      z-index: 2;
+    }
+
+    .flyby-map::before {
+      content: "";
+      position: absolute;
+      inset: -24%;
+      background: conic-gradient(from 20deg, transparent 0 18%, rgba(56, 189, 248, 0.24) 22%, transparent 30% 100%);
+      animation: radarSweep 4.8s linear infinite;
+      opacity: 0.72;
+    }
+
+    .route-line {
+      position: absolute;
+      left: 9%;
+      right: 8%;
+      top: 48%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--pink), var(--blue), var(--pink));
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.8);
+      transform: rotate(-10deg);
+    }
+
+    .route-line::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: -4px;
+      width: 42px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 0 20px rgba(234, 88, 12, 0.92);
+      animation: flyBy 3.4s ease-in-out infinite;
+    }
+
+    .drone-node {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(56, 189, 248, 0.72);
+      border-radius: 999px;
+      color: var(--blue);
+      font: 700 10px/42px "JetBrains Mono", monospace;
+      text-align: center;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.32);
+      animation: droneHover 2.8s ease-in-out infinite alternate;
+      z-index: 1;
+    }
+
+    .drone-node.hot {
+      border-color: rgba(234, 88, 12, 0.76);
+      color: var(--pink);
+      box-shadow: 0 0 22px rgba(234, 88, 12, 0.46);
+      animation-delay: 360ms;
+    }
+
+    .drone-node.n1 { left: 12%; top: 20%; }
+    .drone-node.n2 { right: 18%; top: 16%; }
+    .drone-node.n3 { left: 42%; bottom: 15%; }
+
+    .flyby-status {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .flyby-stat {
+      border-left: 1px solid rgba(56, 189, 248, 0.52);
+      background: rgba(2, 4, 10, 0.54);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      min-width: 0;
+    }
+
+    .flyby-stat span {
+      display: block;
+      color: var(--muted);
+      font: 9px/1.1 "JetBrains Mono", monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .flyby-stat strong {
+      display: block;
+      color: var(--blue);
+      font: 700 11px/1.15 "JetBrains Mono", monospace;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .camera-stack {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .camera-feed {
+      min-height: 70px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(234, 88, 12, 0.22);
+      border-radius: 2px;
+      background:
+        linear-gradient(110deg, transparent 0 36%, rgba(56, 189, 248, 0.16) 38% 42%, transparent 44% 100%),
+        linear-gradient(rgba(255, 255, 255, 0.05) 50%, rgba(2, 4, 10, 0.22) 50%),
+        radial-gradient(circle at 66% 44%, rgba(234, 88, 12, 0.28), transparent 22%),
+        rgba(5, 11, 20, 0.86);
+      background-size: auto, 100% 8px, auto, auto;
+    }
+
+    .camera-feed::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.18), transparent);
+      animation: cameraScan 2.3s ease-in-out infinite;
+    }
+
+    .camera-feed b,
+    .camera-feed span {
+      position: relative;
+      z-index: 1;
+      display: block;
+      padding-left: 12px;
+      padding-right: 12px;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .camera-feed b {
+      padding-top: 10px;
+      color: var(--pink);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+    }
+
+    .camera-feed span {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.25;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    @keyframes radarSweep {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes flyBy {
+      0% { transform: translateX(0) scaleX(0.6); opacity: 0.25; }
+      16% { opacity: 1; }
+      84% { opacity: 1; }
+      100% { transform: translateX(520px) scaleX(1.35); opacity: 0; }
+    }
+
+    @keyframes droneHover {
+      from { transform: translate3d(0, -4px, 0); }
+      to { transform: translate3d(8px, 5px, 0); }
+    }
+
+    @keyframes cameraScan {
+      0% { transform: translateX(-100%); opacity: 0; }
+      35%, 70% { opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+
+    .query-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .query-row input,
+    .query-row button {
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(5, 11, 20, 0.78);
+      color: var(--text);
+      font: 11px/1 "JetBrains Mono", monospace;
+      letter-spacing: 0.1em;
+      min-height: 38px;
+      padding: 0 12px;
+      text-transform: uppercase;
+    }
+
+    .query-row button {
+      color: var(--pink);
+      cursor: pointer;
+    }
+
+    .layout-magnetizing .panel-corner,
+    .layout-magnetizing .corner-node,
+    .layout-magnetizing .anchor-corner {
+      border-color: var(--electric);
+      filter: drop-shadow(0 0 10px rgba(125, 226, 255, 0.95));
+    }
+
+    .layout-magnetizing .electric-arc {
+      background: repeating-linear-gradient(90deg, var(--electric) 0 8px, transparent 8px 13px, #d8fbff 13px 17px);
+      box-shadow: 0 0 12px rgba(125, 226, 255, 0.95), 0 0 28px rgba(125, 226, 255, 0.72);
+    }
+
+    .panel .panel-title .hot,
+    .panel .eq-bar:nth-child(2n),
+    .panel .cell.hot,
+    .panel .response-log b,
+    .panel .voice-button,
+    .panel .voice-copy b,
+    .panel .center-brand span,
+    .panel .route-dot.end,
+    .panel .drone-node.hot,
+    .panel .camera-feed b,
+    .panel .query-row button {
+      color: var(--orange);
+    }
+
+    .panel .eq-bar:nth-child(2n),
+    .panel .cell.hot,
+    .panel .route-dot.end {
+      background: var(--orange);
+    }
+
+    .panel .route-path {
+      border-left-color: var(--orange);
+      border-bottom-color: var(--orange);
+    }
+
+    .panel .flyby-path {
+      background: linear-gradient(90deg, var(--orange), var(--blue), var(--orange));
+    }
+
+    .panel .ring-value,
+    .panel .ring-value span,
+    .panel .flyby-stat strong,
+    .panel .drone-node,
+    .panel .camera-feed b {
+      color: var(--grey);
+      text-shadow: 0 0 16px rgba(221, 226, 229, 0.45);
+    }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .dash-header { align-items: start; flex-direction: column; }
+      .meta { text-align: left; }
+      .body-grid { grid-template-columns: 1fr; }
+      .drone-network { grid-template-columns: 1fr; }
+      .flyby-status { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="aura-blue">
+  <div class="breathing-bg"></div>
+  <div class="dash-aurora" aria-hidden="true"></div>
+  <main class="dash-shell">
+    <div class="graffiti-backlight" aria-hidden="true"></div>
+    <div class="anon-landing-graffiti" aria-hidden="true"></div>
+    <header class="dash-header">
+      <div>
+        <h1 class="brand"><span><span class="brand-a">A</span><span class="brand-non">NON</span></span><span class="brand-equals">=</span><span class="brand-rest"><span class="brand-acro">A</span> <span class="brand-acro">N</span>etwork <span class="brand-acro">O</span>f <span class="brand-acro">N</span>urse's</span></h1>
+        <div class="caption">NETWORK RANGE = 5-10 MILES :: NURSE'S DASH UI</div>
+      </div>
+      <div class="meta">
+        <span>CURRENT STATE: <strong>ALWAYS ON POINT</strong></span>
+        <span>NURSE'S NEEDED: <a class="signup-link" href="https://gist.githack.com/cannonjason2027-lab/0877ef0e9034752a8e6f294dccbd8424/raw/anon-network-complete.html#signup">SIGN UP</a></span>
+        <a class="back-link" href="./index.html">Back to Landing</a>
+      </div>
+    </header>
+
+    <section class="dash-grid">
+      <article class="panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>[01] BIOMETRIC_OXYGEN_BPM</span><span>MONITORING</span></div>
+        <div class="equalizer" id="equalizer"></div>
+        <div class="scanline"></div>
+        <div class="caption">Heart Beats Per Minute</div>
+      </article>
+
+      <article class="panel center-brand" id="coherencePanel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="voice-launch">
+          <strong><span class="center-brand-a">A</span><span class="center-brand-non">NON</span></strong>
+          <span>[SYSTEM_COHERENCE_V1]</span>
+          <button class="voice-button" id="nerseVoiceBtn" type="button" aria-label="Activate NURSE voice interaction">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.92V21a1 1 0 1 1-2 0v-3.08A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0Z"/></svg>
+          </button>
+          <div class="voice-copy">If you are a NURSE, just say <b>"Nurse Ready"</b>.</div>
+        </div>
+        <div class="route-view" id="routeView">
+          <div class="route-title"><span>NURSE ROUTE ACTIVE</span><span id="routeEta">ETA 04:12</span></div>
+          <div class="mini-map" aria-label="Interactive route map placeholder">
+            <div class="route-path"></div>
+            <span class="route-dot start"></span>
+            <span class="route-dot end"></span>
+          </div>
+          <div class="route-steps">
+            <div><b>1.</b> Head north toward the marked blue corridor.</div>
+            <div><b>2.</b> Turn right at the orange pulse marker.</div>
+            <div><b>3.</b> Confirm breathing, administer Narcan, stay until handoff.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>[02] OXYGEN_LEVEL</span><span>MONITORING</span></div>
+        <div class="ring-wrap">
+          <div class="rings">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring-value">97%<span>oxygen level</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>[03] CARDIOLOGIC_HEART_RATE</span><span>MONITORING</span></div>
+        <div class="ring-wrap">
+          <div class="rings">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring-value">73<span>pulse bpm</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>NETWORK ACTIVITY AND MONITOR</span><span class="hot">FLOW ACTIVE</span></div>
+        <div class="activity-grid" id="activityGrid"></div>
+        <div class="caption" style="margin-top: 22px;">STABILITY INDEX: 99.42% &nbsp; NODE_COHERENCE: 1.00</div>
+      </article>
+
+      <article class="panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>[04] RESPIRATION_FIELD</span><span>BREATHING</span></div>
+        <div class="funnel">
+          <div class="funnel-stack">
+            <div class="funnel-ring"></div>
+            <div class="funnel-ring"></div>
+            <div class="funnel-ring"></div>
+            <div class="funnel-ring"></div>
+          </div>
+        </div>
+        <div class="caption">Background and respiratory field breathing live</div>
+      </article>
+
+      <article class="panel square-panel anatomical-panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>USER #20043 ANATOMICAL SCAN</span><span class="hot">HEART SCAN ACTIVE</span></div>
+        <div class="body-grid">
+          <div class="scan-frame">
+            <img class="live-scan-image" src="https://gist.githack.com/cannonjason2027-lab/0877ef0e9034752a8e6f294dccbd8424/raw/assets/anon-anatomical-scan.png" alt="Live anatomical heart, circulation, and respiratory scan">
+            <div class="circulation-overlay" aria-hidden="true"></div>
+            <div class="respiration-overlay" aria-hidden="true"></div>
+          </div>
+          <div class="vitals">
+            <div class="vital"><span>Age</span><strong>19 YRS OLD</strong></div>
+            <div class="vital"><span>SPO2</span><strong>97%</strong></div>
+            <div class="vital"><span>Pulse</span><strong>73 BPM</strong></div>
+            <div class="vital"><span>NURSE</span><strong>NARCAN URGENT RESPONSE SYSTEM ENDGAME</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel square-panel drone-panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>DRONE NETWORK AI FLY-BY</span><span class="hot">CAMERAS LIVE</span></div>
+        <div class="drone-network">
+          <div class="flyby-map" aria-label="Live drone response map">
+            <div class="route-line" aria-hidden="true"></div>
+            <div class="drone-node n1">D-01</div>
+            <div class="drone-node n2 hot">D-07</div>
+            <div class="drone-node n3">D-12</div>
+            <div class="flyby-status">
+              <div class="flyby-stat"><span>Nearest Drone</span><strong id="nearestDrone">D-07 / 0.8 MI</strong></div>
+              <div class="flyby-stat"><span>Camera Mesh</span><strong id="cameraMesh">3 FEEDS LOCKED</strong></div>
+              <div class="flyby-stat"><span>Live Response</span><strong id="flybyResponse">AI FLY-BY ACTIVE</strong></div>
+            </div>
+          </div>
+          <div class="camera-stack">
+            <div class="camera-feed"><b>CAM_01 / STREET LEVEL</b><span id="camOne">Scanning safe approach lane</span></div>
+            <div class="camera-feed"><b>CAM_02 / ROOFLINE</b><span id="camTwo">Response sponsor route visible</span></div>
+            <div class="camera-feed"><b>CAM_03 / BODY LINK</b><span id="camThree">Vitals synced to drone network</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="panel-title"><span>AI RESPONSE LOG</span><span class="hot">GEMINI LIVE LINK</span></div>
+        <div class="response-log" id="responseLog">
+          <p><b>[SYS_AI]:</b> Handshake accepted. Connection stable.</p>
+          <p><b>[SYS_AI]:</b> Taking control of sector grid. I am monitoring your telemetry.</p>
+          <p><b>[SYS_AI]:</b> Neural pathways aligned. Ready for your input.</p>
+        </div>
+        <div class="query-row">
+          <input id="queryInput" type="text" placeholder="Type command system query...">
+          <button id="queryBtn" type="button">Query</button>
+        </div>
+      </article>
+    </section>
+  </main>
+  <div class="layout-edit-badge" id="layoutEditBadge">Ctrl + Shift: move boxes</div>
+  <div class="aura-switch" id="auraSwitch" aria-label="Background color cycle">
+    <button class="aura-blue-dot" type="button" data-aura="blue" aria-label="Blue aura" aria-pressed="true"></button>
+    <button class="aura-orange-dot" type="button" data-aura="orange" aria-label="Orange aura" aria-pressed="false"></button>
+    <button class="aura-pink-dot" type="button" data-aura="pink" aria-label="Pink aura" aria-pressed="false"></button>
+  </div>
+  <div class="bu-guide" id="buGuide" aria-live="polite"><b>BU</b><span></span></div>
+
+  <script>
+    const layoutStorageKey = "anonNerseDashLayout:v3";
+    const graffitiStorageKey = "anonNerseDashGraffiti:v1";
+    const layoutGrid = document.querySelector(".dash-grid");
+    const layoutPanels = [...layoutGrid.querySelectorAll(".panel")];
+    const layoutEditBadge = document.getElementById("layoutEditBadge");
+    const graffitiLayer = document.querySelector(".anon-landing-graffiti");
+    const buGuide = document.getElementById("buGuide");
+    const buGuideText = buGuide.querySelector("span");
+    const auraSwitch = document.getElementById("auraSwitch");
+    const auraButtons = [...auraSwitch.querySelectorAll("[data-aura]")];
+    const auraStorageKey = "anonNurseAuraCycle:v1";
+    const auraFamilies = ["blue", "orange", "pink"];
+    const buGuideSteps = [
+      { corner: "tl", text: "Step 1: press Ctrl + Alt + Shift + D to enter dev mode." },
+      { corner: "tr", text: "Step 2: in dev mode, hold Ctrl + Shift to move boxes or Ctrl + Alt + Shift to resize." },
+      { corner: "br", text: "Step 3: use Ctrl + Caps Lock plus 1-0 for graffiti size, or dev mode arrows/+/- to tune." },
+      { corner: "bl", text: "Step 4: in dev mode, press Ctrl + Alt + Shift + F to fit or G to magnetic snap." }
+    ];
+    let buGuideTimer = null;
+    let layoutEditing = false;
+    let layoutResizeMode = false;
+    let layoutPointer = null;
+    let devMode = false;
+    let graffitiState = {
+      scale: 1,
+      x: 0,
+      y: 0
+    };
+    let selectedAuras = ["blue"];
+    let auraIndex = 0;
+    let auraTimer = null;
+
+    layoutPanels.forEach((panel, index) => {
+      panel.dataset.layoutId = panel.dataset.layoutId || `panel-${index}`;
+      const content = document.createElement("div");
+      content.className = "layout-panel-content";
+      [...panel.children].forEach((child) => {
+        if (!child.classList.contains("corner")) content.appendChild(child);
+      });
+      panel.appendChild(content);
+      const handle = document.createElement("span");
+      handle.className = "layout-resize-handle";
+      handle.setAttribute("aria-hidden", "true");
+      panel.appendChild(handle);
+      for (let arcIndex = 1; arcIndex <= 4; arcIndex += 1) {
+        const arc = document.createElement("span");
+        arc.className = `electric-arc a${arcIndex}`;
+        arc.setAttribute("aria-hidden", "true");
+        panel.appendChild(arc);
+      }
+    });
+
+    function numberFromPx(value, fallback) {
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function applyAuraColor(color) {
+      document.body.classList.remove("aura-blue", "aura-orange", "aura-pink");
+      document.body.classList.add(`aura-${color}`);
+    }
+
+    function saveAuraSelection() {
+      localStorage.setItem(auraStorageKey, JSON.stringify(selectedAuras));
+    }
+
+    function syncAuraButtons() {
+      auraButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(selectedAuras.includes(button.dataset.aura)));
+      });
+    }
+
+    function runAuraCycle() {
+      window.clearInterval(auraTimer);
+      auraIndex = 0;
+      applyAuraColor(selectedAuras[0] || "blue");
+      syncAuraButtons();
+      if (selectedAuras.length < 2) return;
+      auraTimer = window.setInterval(() => {
+        auraIndex = (auraIndex + 1) % selectedAuras.length;
+        applyAuraColor(selectedAuras[auraIndex]);
+      }, 6200);
+    }
+
+    function loadAuraSelection() {
+      const raw = localStorage.getItem(auraStorageKey);
+      if (raw) {
+        try {
+          const saved = JSON.parse(raw).filter((item) => auraFamilies.includes(item));
+          if (saved.length) selectedAuras = saved;
+        } catch {
+          localStorage.removeItem(auraStorageKey);
+        }
+      }
+      runAuraCycle();
+    }
+
+    auraButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const color = button.dataset.aura;
+        selectedAuras = selectedAuras.includes(color)
+          ? selectedAuras.filter((item) => item !== color)
+          : [...selectedAuras, color];
+        if (!selectedAuras.length) selectedAuras = [color];
+        selectedAuras = auraFamilies.filter((item) => selectedAuras.includes(item));
+        saveAuraSelection();
+        runAuraCycle();
+      });
+    });
+
+    function saveGraffiti() {
+      localStorage.setItem(graffitiStorageKey, JSON.stringify(graffitiState));
+    }
+
+    function applyGraffiti() {
+      document.documentElement.style.setProperty("--graffiti-scale", graffitiState.scale.toFixed(2));
+      document.documentElement.style.setProperty("--graffiti-x", `${Math.round(graffitiState.x)}px`);
+      document.documentElement.style.setProperty("--graffiti-y", `${Math.round(graffitiState.y)}px`);
+    }
+
+    function applySavedGraffiti() {
+      const raw = localStorage.getItem(graffitiStorageKey);
+      if (raw) {
+        try {
+          const saved = JSON.parse(raw);
+          graffitiState = {
+            scale: clamp(Number(saved.scale) || 1, 0.55, 10),
+            x: clamp(Number(saved.x) || 0, -180, 180),
+            y: clamp(Number(saved.y) || 0, -140, 160)
+          };
+        } catch {
+          localStorage.removeItem(graffitiStorageKey);
+        }
+      }
+      applyGraffiti();
+    }
+
+    function setDevMode(active) {
+      devMode = active;
+      document.body.classList.toggle("dev-mode", devMode);
+      if (!devMode) setLayoutEditing(false);
+      layoutEditBadge.textContent = devMode
+        ? "Dev mode: Ctrl+Shift move | Ctrl+Alt+Shift resize | arrows/+/- graffiti"
+        : "Ctrl + Alt + Shift + D: dev mode";
+    }
+
+    function adjustGraffiti({ scaleDelta = 0, xDelta = 0, yDelta = 0, reset = false }) {
+      if (reset) {
+        graffitiState = { scale: 1, x: 0, y: 0 };
+      } else {
+        graffitiState = {
+          scale: clamp(graffitiState.scale + scaleDelta, 0.55, 10),
+          x: clamp(graffitiState.x + xDelta, -180, 180),
+          y: clamp(graffitiState.y + yDelta, -140, 160)
+        };
+      }
+      applyGraffiti();
+      saveGraffiti();
+      document.body.classList.add("graffiti-editing");
+      layoutEditBadge.textContent = `Graffiti size ${graffitiState.scale.toFixed(2)} | x ${Math.round(graffitiState.x)} | y ${Math.round(graffitiState.y)}`;
+      window.clearTimeout(adjustGraffiti.timer);
+      adjustGraffiti.timer = window.setTimeout(() => {
+        document.body.classList.remove("graffiti-editing");
+        if (devMode) {
+          layoutEditBadge.textContent = "Dev mode: Ctrl+Shift move | Ctrl+Alt+Shift resize | arrows/+/- graffiti";
+        }
+      }, 1200);
+    }
+
+    function setGraffitiScale(scale) {
+      graffitiState = {
+        ...graffitiState,
+        scale: clamp(scale, 0.55, 10)
+      };
+      applyGraffiti();
+      saveGraffiti();
+      document.body.classList.add("graffiti-editing");
+      layoutEditBadge.textContent = `Graffiti size ${graffitiState.scale.toFixed(0)}x`;
+      window.clearTimeout(setGraffitiScale.timer);
+      setGraffitiScale.timer = window.setTimeout(() => {
+        document.body.classList.remove("graffiti-editing");
+        if (devMode) {
+          layoutEditBadge.textContent = "Dev mode: Ctrl+Shift move | Ctrl+Alt+Shift resize | arrows/+/- graffiti";
+        }
+      }, 1200);
+    }
+
+    function saveLayout() {
+      if (!layoutGrid.classList.contains("layout-custom")) return;
+      const layout = {
+        height: numberFromPx(layoutGrid.style.height, layoutGrid.scrollHeight),
+        panels: {}
+      };
+      layoutPanels.forEach((panel) => {
+        layout.panels[panel.dataset.layoutId] = {
+          left: numberFromPx(panel.style.left, panel.offsetLeft),
+          top: numberFromPx(panel.style.top, panel.offsetTop),
+          width: numberFromPx(panel.style.width, panel.offsetWidth),
+          height: numberFromPx(panel.style.height, panel.offsetHeight),
+          fitScale: numberFromPx(panel.style.getPropertyValue("--fit-scale"), 1)
+        };
+      });
+      localStorage.setItem(layoutStorageKey, JSON.stringify(layout));
+    }
+
+    function applySavedLayout() {
+      const raw = localStorage.getItem(layoutStorageKey);
+      if (!raw) return;
+      try {
+        const layout = JSON.parse(raw);
+        layoutGrid.classList.add("layout-custom");
+        layoutGrid.style.height = `${layout.height || 720}px`;
+        layoutPanels.forEach((panel) => {
+          const item = layout.panels?.[panel.dataset.layoutId];
+          if (!item) return;
+          panel.style.left = `${item.left}px`;
+          panel.style.top = `${item.top}px`;
+          panel.style.width = `${item.width}px`;
+          panel.style.height = `${item.height}px`;
+          panel.style.setProperty("--fit-scale", item.fitScale || 1);
+        });
+      } catch {
+        localStorage.removeItem(layoutStorageKey);
+      }
+    }
+
+    function convertGridToCustomLayout() {
+      if (layoutGrid.classList.contains("layout-custom")) return;
+      const gridRect = layoutGrid.getBoundingClientRect();
+      const panelRects = layoutPanels.map((panel) => panel.getBoundingClientRect());
+      layoutGrid.style.height = `${layoutGrid.offsetHeight}px`;
+      layoutGrid.classList.add("layout-custom");
+      layoutPanels.forEach((panel, index) => {
+        const rect = panelRects[index];
+        panel.style.left = `${rect.left - gridRect.left + layoutGrid.scrollLeft}px`;
+        panel.style.top = `${rect.top - gridRect.top + layoutGrid.scrollTop}px`;
+        panel.style.width = `${rect.width}px`;
+        panel.style.height = `${rect.height}px`;
+      });
+      saveLayout();
+    }
+
+    function setLayoutEditing(active, resizeMode = false) {
+      if (active && !devMode) return;
+      layoutEditing = active;
+      layoutResizeMode = active && resizeMode;
+      document.body.classList.toggle("layout-editing", active);
+      document.body.classList.toggle("layout-resizing", layoutResizeMode);
+      layoutEditBadge.textContent = layoutResizeMode ? "Ctrl + Alt + Shift: resize boxes" : "Ctrl + Shift: move boxes";
+      if (active) convertGridToCustomLayout();
+      if (!active) saveLayout();
+    }
+
+    function fitPanelContent(panel) {
+      const content = panel.querySelector(".layout-panel-content");
+      if (!content) return;
+      panel.style.setProperty("--fit-scale", 1);
+      const panelStyle = getComputedStyle(panel);
+      const availableWidth = panel.clientWidth - numberFromPx(panelStyle.paddingLeft, 0) - numberFromPx(panelStyle.paddingRight, 0);
+      const availableHeight = panel.clientHeight - numberFromPx(panelStyle.paddingTop, 0) - numberFromPx(panelStyle.paddingBottom, 0);
+      const neededWidth = Math.max(content.scrollWidth, content.getBoundingClientRect().width);
+      const neededHeight = Math.max(content.scrollHeight, content.getBoundingClientRect().height);
+      const scale = clamp(Math.min(availableWidth / neededWidth, availableHeight / neededHeight, 1), 0.58, 1);
+      panel.style.setProperty("--fit-scale", scale.toFixed(3));
+      content.style.left = "50%";
+      content.style.top = "50%";
+      content.style.transform = `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
+    }
+
+    function fitLayoutContents() {
+      convertGridToCustomLayout();
+      layoutPanels.forEach(fitPanelContent);
+      saveLayout();
+      layoutEditBadge.textContent = "Contents fitted to boxes";
+      document.body.classList.add("layout-fit-flash");
+      window.setTimeout(() => {
+        document.body.classList.remove("layout-fit-flash");
+        if (!layoutEditing) layoutEditBadge.textContent = "Ctrl + Shift: move boxes";
+      }, 1200);
+    }
+
+    function snapLockLayout() {
+      convertGridToCustomLayout();
+      const gap = 14;
+      const count = layoutPanels.length;
+      const columns = Math.ceil(Math.sqrt(count));
+      const rowsTarget = Math.ceil(count / columns);
+      const maxSquareWidth = Math.floor((layoutGrid.clientWidth - gap * (columns - 1)) / columns);
+      const viewportRoom = Math.max(230, window.innerHeight - 190);
+      const maxSquareHeight = Math.floor((viewportRoom - gap * (rowsTarget - 1)) / rowsTarget);
+      const squareSize = clamp(Math.min(maxSquareWidth, maxSquareHeight), 190, maxSquareWidth);
+      const clusterWidth = columns * squareSize + gap * (columns - 1);
+      const startLeft = Math.max(0, Math.round((layoutGrid.clientWidth - clusterWidth) / 2));
+      const slotList = Array.from({ length: rowsTarget * columns }, (_, index) => {
+        const row = Math.floor(index / columns);
+        const column = index % columns;
+        return {
+          row,
+          column,
+          left: startLeft + column * (squareSize + gap),
+          top: row * (squareSize + gap),
+          centerX: startLeft + column * (squareSize + gap) + squareSize / 2,
+          centerY: row * (squareSize + gap) + squareSize / 2
+        };
+      });
+      const slots = [];
+      document.body.classList.add("layout-magnetizing");
+
+      const items = layoutPanels.map((panel, order) => ({
+        panel,
+        order,
+        centerX: numberFromPx(panel.style.left, panel.offsetLeft) + numberFromPx(panel.style.width, panel.offsetWidth) / 2,
+        centerY: numberFromPx(panel.style.top, panel.offsetTop) + numberFromPx(panel.style.height, panel.offsetHeight) / 2
+      }));
+
+      const rankedClaims = [];
+      items.forEach((item) => {
+        slotList.forEach((slot, slotIndex) => {
+          const distance = Math.hypot(item.centerX - slot.centerX, item.centerY - slot.centerY);
+          rankedClaims.push({ item, slot, slotIndex, distance });
+        });
+      });
+      rankedClaims.sort((a, b) => (a.distance - b.distance) || (a.item.order - b.item.order) || (a.slotIndex - b.slotIndex));
+
+      const assignedItems = new Set();
+      const assignedSlots = new Set();
+      rankedClaims.forEach((claim) => {
+        if (assignedItems.has(claim.item) || assignedSlots.has(claim.slotIndex)) return;
+        assignedItems.add(claim.item);
+        assignedSlots.add(claim.slotIndex);
+        slots.push(claim.slot);
+        claim.item.panel.style.left = `${claim.slot.left}px`;
+        claim.item.panel.style.top = `${claim.slot.top}px`;
+        claim.item.panel.style.width = `${squareSize}px`;
+        claim.item.panel.style.height = `${squareSize}px`;
+      });
+
+      const rows = slots.length ? Math.max(...slots.map((slot) => slot.row)) + 1 : 1;
+      layoutGrid.style.height = `${rows * squareSize + Math.max(0, rows - 1) * gap}px`;
+      window.setTimeout(() => {
+        layoutPanels.forEach(fitPanelContent);
+        saveLayout();
+        document.body.classList.remove("layout-magnetizing");
+      }, 430);
+      layoutEditBadge.textContent = "Magnetic snap locked";
+      document.body.classList.add("layout-snap-flash");
+      window.setTimeout(() => {
+        document.body.classList.remove("layout-snap-flash");
+        if (!layoutEditing) layoutEditBadge.textContent = "Ctrl + Shift: move boxes";
+      }, 1400);
+    }
+
+    function showBuGuideStep(index = 0) {
+      window.clearTimeout(buGuideTimer);
+      const step = buGuideSteps[index];
+      if (!step) {
+        buGuide.className = "bu-guide";
+        return;
+      }
+      buGuide.className = `bu-guide ${step.corner}`;
+      buGuideText.textContent = step.text;
+      window.requestAnimationFrame(() => buGuide.classList.add("active"));
+      buGuideTimer = window.setTimeout(() => {
+        buGuide.classList.remove("active");
+        buGuideTimer = window.setTimeout(() => showBuGuideStep(index + 1), 220);
+      }, 2200);
+    }
+
+    function updateGridHeightFor(panel) {
+      const bottom = numberFromPx(panel.style.top, panel.offsetTop) + numberFromPx(panel.style.height, panel.offsetHeight) + 24;
+      const currentHeight = numberFromPx(layoutGrid.style.height, layoutGrid.offsetHeight);
+      if (bottom > currentHeight) layoutGrid.style.height = `${bottom}px`;
+    }
+
+    function startLayoutPointer(event, panel, mode) {
+      if (!layoutEditing) return;
+      if (event.button !== 0) return;
+      const activeMode = layoutResizeMode ? "resize" : mode;
+      if (activeMode === "move" && event.target.closest("button, input, a, .layout-resize-handle")) return;
+      event.preventDefault();
+      panel.setPointerCapture(event.pointerId);
+      const rect = panel.getBoundingClientRect();
+      layoutPointer = {
+        mode: activeMode,
+        panel,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        left: numberFromPx(panel.style.left, panel.offsetLeft),
+        top: numberFromPx(panel.style.top, panel.offsetTop),
+        width: rect.width,
+        height: rect.height
+      };
+    }
+
+    function moveLayoutPointer(event) {
+      if (!layoutPointer || event.pointerId !== layoutPointer.pointerId) return;
+      event.preventDefault();
+      const panel = layoutPointer.panel;
+      const dx = event.clientX - layoutPointer.startX;
+      const dy = event.clientY - layoutPointer.startY;
+      const maxLeft = Math.max(0, layoutGrid.clientWidth - 180);
+      if (layoutPointer.mode === "move") {
+        panel.style.left = `${clamp(layoutPointer.left + dx, 0, maxLeft)}px`;
+        panel.style.top = `${Math.max(0, layoutPointer.top + dy)}px`;
+      } else {
+        const width = clamp(layoutPointer.width + dx, 220, layoutGrid.clientWidth);
+        const height = Math.max(180, layoutPointer.height + dy);
+        panel.style.width = `${width}px`;
+        panel.style.height = `${height}px`;
+      }
+      updateGridHeightFor(panel);
+    }
+
+    function stopLayoutPointer(event) {
+      if (!layoutPointer || event.pointerId !== layoutPointer.pointerId) return;
+      layoutPointer.panel.releasePointerCapture(event.pointerId);
+      layoutPointer = null;
+      saveLayout();
+    }
+
+    layoutPanels.forEach((panel) => {
+      panel.addEventListener("pointerdown", (event) => startLayoutPointer(event, panel, "move"));
+      panel.querySelector(".layout-resize-handle").addEventListener("pointerdown", (event) => {
+        startLayoutPointer(event, panel, "resize");
+      });
+      panel.addEventListener("pointermove", moveLayoutPointer);
+      panel.addEventListener("pointerup", stopLayoutPointer);
+      panel.addEventListener("pointercancel", stopLayoutPointer);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.shiftKey && !event.altKey && event.key.toLowerCase() === "i") {
+        event.preventDefault();
+        showBuGuideStep();
+        return;
+      }
+      if (event.ctrlKey && event.altKey && event.shiftKey && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        setDevMode(!devMode);
+        return;
+      }
+      if (event.ctrlKey && event.altKey && event.shiftKey && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-", "_", "0"].includes(event.key)) {
+        event.preventDefault();
+        if (!devMode) return;
+        const step = event.repeat ? 8 : 4;
+        if (event.key === "ArrowLeft") adjustGraffiti({ xDelta: -step });
+        if (event.key === "ArrowRight") adjustGraffiti({ xDelta: step });
+        if (event.key === "ArrowUp") adjustGraffiti({ yDelta: -step });
+        if (event.key === "ArrowDown") adjustGraffiti({ yDelta: step });
+        if (event.key === "+" || event.key === "=") adjustGraffiti({ scaleDelta: 0.05 });
+        if (event.key === "-" || event.key === "_") adjustGraffiti({ scaleDelta: -0.05 });
+        if (event.key === "0") adjustGraffiti({ reset: true });
+        return;
+      }
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && event.getModifierState("CapsLock") && /^[0-9]$/.test(event.key)) {
+        event.preventDefault();
+        const requestedScale = event.key === "0" ? 10 : Number(event.key);
+        setGraffitiScale(requestedScale);
+        return;
+      }
+      if (event.ctrlKey && event.altKey && event.shiftKey && event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        if (!devMode) return;
+        fitLayoutContents();
+        return;
+      }
+      if (event.ctrlKey && event.altKey && event.shiftKey && event.key.toLowerCase() === "g") {
+        event.preventDefault();
+        if (!devMode) return;
+        snapLockLayout();
+        return;
+      }
+      if (devMode && event.ctrlKey && event.shiftKey) setLayoutEditing(true, event.altKey);
+    });
+
+    window.addEventListener("keyup", (event) => {
+      if (event.ctrlKey && event.altKey && event.shiftKey && event.key.toLowerCase() === "d") return;
+      if (!devMode || !event.ctrlKey || !event.shiftKey) setLayoutEditing(false);
+      else setLayoutEditing(true, event.altKey);
+    });
+
+    window.addEventListener("blur", () => setLayoutEditing(false));
+    applySavedLayout();
+    applySavedGraffiti();
+    loadAuraSelection();
+    setDevMode(false);
+
+    const equalizer = document.getElementById("equalizer");
+    for (let i = 0; i < 18; i += 1) {
+      const bar = document.createElement("div");
+      bar.className = "eq-bar";
+      bar.style.animationDelay = `${i * 55}ms`;
+      equalizer.appendChild(bar);
+    }
+
+    const activityGrid = document.getElementById("activityGrid");
+    const cells = [];
+    for (let i = 0; i < 45; i += 1) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      activityGrid.appendChild(cell);
+      cells.push(cell);
+    }
+
+    function paintGrid() {
+      cells.forEach((cell, index) => {
+        const active = Math.random() > 0.55 || index % 8 === 0;
+        const hot = active && (index + Date.now()) % 7 < 2;
+        cell.className = "cell";
+        if (active) cell.classList.add(hot ? "hot" : "on");
+        cell.style.transform = `translateY(${Math.sin(Date.now() / 400 + index) * 4}px)`;
+      });
+    }
+
+    window.setInterval(paintGrid, 700);
+    paintGrid();
+
+    const flybyStates = [
+      {
+        nearest: "D-07 / 0.8 MI",
+        mesh: "3 FEEDS LOCKED",
+        response: "AI FLY-BY ACTIVE",
+        camOne: "Scanning safe approach lane",
+        camTwo: "Response sponsor route visible",
+        camThree: "Vitals synced to drone network"
+      },
+      {
+        nearest: "D-12 / 1.1 MI",
+        mesh: "5 FEEDS MERGED",
+        response: "CAMERAS TRIANGULATING",
+        camOne: "Crosswalk and doorway view clear",
+        camTwo: "Overhead fly-by passing north",
+        camThree: "SPO2 and pulse stable in feed"
+      },
+      {
+        nearest: "D-01 / 0.6 MI",
+        mesh: "THERMAL LINK READY",
+        response: "NURSE ROUTE GUIDED",
+        camOne: "Street camera confirms open path",
+        camTwo: "Drone camera tracking responder",
+        camThree: "Body signal remains connected"
+      }
+    ];
+
+    let flybyIndex = 0;
+    function updateFlyby() {
+      const state = flybyStates[flybyIndex % flybyStates.length];
+      document.getElementById("nearestDrone").textContent = state.nearest;
+      document.getElementById("cameraMesh").textContent = state.mesh;
+      document.getElementById("flybyResponse").textContent = state.response;
+      document.getElementById("camOne").textContent = state.camOne;
+      document.getElementById("camTwo").textContent = state.camTwo;
+      document.getElementById("camThree").textContent = state.camThree;
+      flybyIndex += 1;
+    }
+
+    window.setInterval(updateFlyby, 2400);
+    updateFlyby();
+
+    document.getElementById("queryBtn").addEventListener("click", () => {
+      const input = document.getElementById("queryInput");
+      const value = input.value.trim() || "COMMENCE SYSTEM QUERY";
+      const log = document.getElementById("responseLog");
+      const item = document.createElement("p");
+      item.innerHTML = `<b>[YOU]:</b> ${value}`;
+      const reply = document.createElement("p");
+      reply.innerHTML = "<b>[ANON]:</b> Drone network fly-by is live. Cameras, body telemetry, oxygen, pulse, and response route are linked.";
+      log.appendChild(item);
+      log.appendChild(reply);
+      log.scrollTop = log.scrollHeight;
+      input.value = "";
+    });
+
+    const coherencePanel = document.getElementById("coherencePanel");
+    const nerseVoiceBtn = document.getElementById("nerseVoiceBtn");
+    const routeEta = document.getElementById("routeEta");
+    let etaSeconds = 252;
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.92;
+      utterance.pitch = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function activateNerseRoute() {
+      coherencePanel.classList.add("route-active");
+      speak("Let's get you where you need to go.");
+      const log = document.getElementById("responseLog");
+      const item = document.createElement("p");
+      item.innerHTML = "<b>[ANON]:</b> NURSE READY confirmed. Route handoff active. Step-by-step directions loaded.";
+      log.appendChild(item);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function listenForNerseReady() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        activateNerseRoute();
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      recognition.onresult = (event) => {
+        const phrase = event.results[0][0].transcript.toLowerCase();
+        if (phrase.includes("nurse ready")) {
+          activateNerseRoute();
+        } else {
+          speak("Say Nurse Ready to activate route guidance.");
+        }
+      };
+      recognition.onerror = activateNerseRoute;
+      recognition.start();
+    }
+
+    nerseVoiceBtn.addEventListener("click", listenForNerseReady);
+
+    window.setInterval(() => {
+      if (!coherencePanel.classList.contains("route-active")) return;
+      etaSeconds = Math.max(58, etaSeconds - 1);
+      const minutes = String(Math.floor(etaSeconds / 60)).padStart(2, "0");
+      const seconds = String(etaSeconds % 60).padStart(2, "0");
+      routeEta.textContent = `ETA ${minutes}:${seconds}`;
+    }, 1000);
+  </script>
+  <script src="https://gist.githack.com/cannonjason2027-lab/0877ef0e9034752a8e6f294dccbd8424/raw/52e10039914aefd21e103250f48d9d1cd740abe1/anon-theme.js?v=hostinger-1"></script>
+</body>
+</html>
+
+
